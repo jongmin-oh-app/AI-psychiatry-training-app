@@ -18,6 +18,8 @@ class ImprovementLineChart extends StatelessWidget {
     AppColors.error,
   ];
 
+  static const _dotRadii = [7.0, 5.0, 3.5, 2.0];
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -165,6 +167,11 @@ class ImprovementLineChart extends StatelessWidget {
           barWidth: 2,
           dotData: FlDotData(
             show: scoreHistory.length <= 10,
+            getDotPainter: (spot, percent, bar, index) => FlDotCirclePainter(
+              radius: _dotRadii[catIdx],
+              color: _lineColors[catIdx],
+              strokeWidth: 0,
+            ),
           ),
           belowBarData: BarAreaData(show: false),
         );
