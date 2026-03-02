@@ -17,7 +17,8 @@ class ScenarioCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      color: isCompleted ? const Color(0xFFF5F5F5) : Colors.white,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
@@ -31,7 +32,11 @@ class ScenarioCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       scenario.title,
-                      style: Theme.of(context).textTheme.headlineMedium,
+                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                            color: isCompleted
+                                ? AppColors.secondaryText
+                                : AppColors.primaryText,
+                          ),
                     ),
                   ),
                   _buildDifficultyBadge(context),
@@ -40,42 +45,35 @@ class ScenarioCard extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 scenario.description,
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: isCompleted
+                          ? AppColors.hintText
+                          : AppColors.secondaryText,
+                    ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 12),
               Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.access_time,
                     size: 16,
-                    color: AppColors.secondaryText,
+                    color: isCompleted
+                        ? AppColors.hintText
+                        : AppColors.secondaryText,
                   ),
                   const SizedBox(width: 4),
                   Text(
                     '${scenario.estimatedTime}분',
-                    style: Theme.of(context).textTheme.bodyMedium,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: isCompleted
+                              ? AppColors.hintText
+                              : AppColors.secondaryText,
+                        ),
                   ),
                   const Spacer(),
-                  if (isCompleted)
-                    const Row(
-                      children: [
-                        Icon(
-                          Icons.check_circle,
-                          size: 16,
-                          color: AppColors.success,
-                        ),
-                        SizedBox(width: 4),
-                        Text(
-                          '완료',
-                          style: TextStyle(
-                            color: AppColors.success,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
+                  if (isCompleted) _CompletedCta() else _IncompleteCta(),
                 ],
               ),
             ],
@@ -107,10 +105,12 @@ class ScenarioCard extends StatelessWidget {
         text = scenario.difficulty;
     }
 
+    if (isCompleted) color = AppColors.hintText;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
@@ -120,6 +120,61 @@ class ScenarioCard extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
       ),
+    );
+  }
+}
+
+class _IncompleteCta extends StatelessWidget {
+  const _IncompleteCta();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Row(
+      children: [
+        Text(
+          '시작하기',
+          style: TextStyle(
+            color: AppColors.primaryBlue,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        SizedBox(width: 2),
+        Icon(
+          Icons.arrow_forward_ios,
+          size: 11,
+          color: AppColors.primaryBlue,
+        ),
+      ],
+    );
+  }
+}
+
+class _CompletedCta extends StatelessWidget {
+  const _CompletedCta();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Row(
+      children: [
+        Icon(Icons.check_circle, size: 15, color: AppColors.success),
+        SizedBox(width: 4),
+        Text(
+          '완료',
+          style: TextStyle(
+            color: AppColors.success,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        SizedBox(width: 10),
+        Icon(Icons.refresh, size: 14, color: AppColors.hintText),
+        SizedBox(width: 3),
+        Text(
+          '다시 연습',
+          style: TextStyle(color: AppColors.hintText, fontSize: 12),
+        ),
+      ],
     );
   }
 }
