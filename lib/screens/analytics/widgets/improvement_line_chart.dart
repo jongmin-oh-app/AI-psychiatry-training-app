@@ -3,13 +3,21 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/colors.dart';
 import '../../../providers/analytics_provider.dart';
 
-class ImprovementLineChart extends StatelessWidget {
+class ImprovementLineChart extends StatefulWidget {
   final List<SessionScore> scoreHistory;
 
   const ImprovementLineChart({
     super.key,
     required this.scoreHistory,
   });
+
+  @override
+  State<ImprovementLineChart> createState() => _ImprovementLineChartState();
+}
+
+class _ImprovementLineChartState extends State<ImprovementLineChart>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabController;
 
   static const _lineColors = [
     AppColors.primaryBlue,
@@ -18,7 +26,22 @@ class ImprovementLineChart extends StatelessWidget {
     AppColors.error,
   ];
 
-  static const _dotRadii = [7.0, 5.0, 3.5, 2.0];
+  static const _tabLabels = ['공감 표현', '경청 능력', '질문 기술', '해결 방안'];
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: _tabLabels.length, vsync: this);
+    _tabController.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  Color get _selectedColor => _lineColors[_tabController.index];
 
   @override
   Widget build(BuildContext context) {
@@ -35,10 +58,25 @@ class ImprovementLineChart extends StatelessWidget {
                   ),
             ),
             const SizedBox(height: 8),
-            if (scoreHistory.length < 2)
+            if (widget.scoreHistory.length < 2)
               _buildNotEnoughData(context)
             else ...[
-              _buildLegend(context),
+              TabBar(
+                controller: _tabController,
+                isScrollable: true,
+                tabAlignment: TabAlignment.start,
+                indicatorColor: _selectedColor,
+                labelColor: _selectedColor,
+                unselectedLabelColor: AppColors.secondaryText,
+                labelStyle: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+                unselectedLabelStyle: const TextStyle(fontSize: 12),
+                tabs: _tabLabels
+                    .map((label) => Tab(text: label))
+                    .toList(),
+              ),
               const SizedBox(height: 16),
               SizedBox(
                 height: 200,
@@ -65,32 +103,11 @@ class ImprovementLineChart extends StatelessWidget {
     );
   }
 
-  Widget _buildLegend(BuildContext context) {
-    return Wrap(
-      spacing: 16,
-      runSpacing: 4,
-      children: List.generate(categoryKeys.length, (i) {
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 12,
-              height: 3,
-              color: _lineColors[i],
-            ),
-            const SizedBox(width: 4),
-            Text(
-              categoryLabels[categoryKeys[i]]!,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
-        );
-      }),
-    );
-  }
-
   LineChartData _buildChart() {
-    final maxX = (scoreHistory.length - 1).toDouble();
+    final selectedTab = _tabController.index;
+    final maxX = (widget.scoreHistory.length - 1).toDouble();
+
+    final visibleIndices = [selectedTab];
 
     return LineChartData(
       minY: 0,
@@ -101,7 +118,7 @@ class ImprovementLineChart extends StatelessWidget {
         show: true,
         horizontalInterval: 1,
         getDrawingHorizontalLine: (value) => FlLine(
-          color: Colors.grey.withOpacity(0.2),
+          color: Colors.grey.withValues(alpha: 0.2),
           strokeWidth: 1,
         ),
         drawVerticalLine: false,
@@ -133,7 +150,7 @@ class ImprovementLineChart extends StatelessWidget {
             interval: 1,
             getTitlesWidget: (value, meta) {
               final idx = value.toInt();
-              if (idx < 0 || idx >= scoreHistory.length) {
+              if (idx < 0 || idx >= widget.scoreHistory.length) {
                 return const SizedBox.shrink();
               }
               return Text(
@@ -154,10 +171,10 @@ class ImprovementLineChart extends StatelessWidget {
         ),
       ),
       borderData: FlBorderData(show: false),
-      lineBarsData: List.generate(categoryKeys.length, (catIdx) {
+      lineBarsData: visibleIndices.map((catIdx) {
         final key = categoryKeys[catIdx];
         return LineChartBarData(
-          spots: scoreHistory.map((s) {
+          spots: widget.scoreHistory.map((s) {
             final score = s.scores[key]?.toDouble() ?? 0;
             return FlSpot(s.index.toDouble(), score);
           }).toList(),
@@ -165,27 +182,20 @@ class ImprovementLineChart extends StatelessWidget {
           curveSmoothness: 0.3,
           color: _lineColors[catIdx],
           barWidth: 2,
-          dotData: FlDotData(
-            show: scoreHistory.length <= 10,
-            getDotPainter: (spot, percent, bar, index) => FlDotCirclePainter(
-              radius: _dotRadii[catIdx],
-              color: _lineColors[catIdx],
-              strokeWidth: 0,
-            ),
-          ),
+          dotData: FlDotData(show: widget.scoreHistory.length <= 10),
           belowBarData: BarAreaData(show: false),
         );
-      }),
+      }).toList(),
       lineTouchData: LineTouchData(
         touchTooltipData: LineTouchTooltipData(
           getTooltipItems: (touchedSpots) {
             return touchedSpots.map((spot) {
-              final key = categoryKeys[spot.barIndex];
+              final catIdx = visibleIndices[spot.barIndex];
+              final key = categoryKeys[catIdx];
               return LineTooltipItem(
-                '${categoryLabels[key]}: '
-                '${spot.y.toStringAsFixed(0)}',
+                '${categoryLabels[key]}: ${spot.y.toStringAsFixed(0)}',
                 TextStyle(
-                  color: _lineColors[spot.barIndex],
+                  color: _lineColors[catIdx],
                   fontSize: 12,
                 ),
               );
