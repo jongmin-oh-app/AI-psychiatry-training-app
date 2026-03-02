@@ -35,10 +35,25 @@ flutter analyze
 
 The app uses flutter_riverpod for state management. Key providers:
 
-- **currentSessionProvider**: Manages the active training session (StateNotifierProvider)
-- **scenariosProvider**: Loads scenarios from JSON assets (FutureProvider)
-- **chatProvider**: Handles chat message sending and AI response generation (StateNotifierProvider)
-- **storageServiceProvider**: Provides access to local storage service (Provider)
+**scenario_provider.dart:**
+- `storageServiceProvider`: Provider<StorageService>
+- `scenariosProvider`: FutureProvider<List<Scenario>> (loads from assets JSON)
+- `scenarioByIdProvider`: Provider.family<AsyncValue<Scenario?>, String>
+- `isScenarioCompletedProvider`: Provider.family<bool, String>
+- `completedScenarioCountProvider`: Provider<int>
+
+**session_provider.dart:**
+- `currentSessionProvider`: StateNotifierProvider for the active session
+- `allSessionsProvider`, `completedSessionsProvider`, `activeSessionsProvider`: Derived session lists
+
+**chat_provider.dart:**
+- `geminiServiceProvider`: Provider<GeminiService>
+- `isAITypingProvider`, `isFeedbackGeneratingProvider`: StateProvider<bool> (UI state)
+- `chatProvider`: StateNotifierProvider for chat operations + AI response generation
+- `ChatNotifier._getProgressionGuideline()`: Adapts AI behavior by difficulty + turn count
+
+**analytics_provider.dart:**
+- `analyticsDataProvider`: Computes AnalyticsData (totals, category averages, score history, improvement rate) from completedSessionsProvider
 
 When working with providers:
 - Use `ref.read()` for one-time access in event handlers
@@ -86,14 +101,23 @@ After modifying any model, run code generation to update `.g.dart` files.
 - `markScenarioAsCompleted()`: Tracks which scenarios have been completed
 - Must call `init()` before use (called in main.dart)
 
+### Analytics
+
+AnalyticsScreen (lib/screens/analytics/) displays performance data derived from completed sessions via `analyticsDataProvider`. Widgets in lib/screens/analytics/widgets/:
+- `ImprovementLineChart`: StatefulWidget with 4 tabs (empathy, listening, questioning, solution) using `fl_chart`; requires 2+ completed sessions
+- `CategoryScoresChart`, `ScoreSummaryCard`, `WeaknessReportCard`
+
+The 4 scored categories are: empathy, listening, questioning, solution (scored 0–5).
+
 ### Navigation with GoRouter
 
 Router configuration in lib/core/router/app_router.dart:
 
-- Uses StatefulShellRoute with indexed stack for bottom navigation (3 tabs):
+- Uses StatefulShellRoute with indexed stack for bottom navigation (4 tabs):
   - `/scenarios` (HomeScreen): Browse available scenarios
   - `/counseling` (CounselingScreen): Counseling-related content
   - `/history` (HistoryScreen): View past training sessions
+  - `/analytics` (AnalyticsScreen): Charts and performance metrics
 
 - Full-screen routes (use rootNavigatorKey):
   - `/scenario/:id` (ScenarioDetailScreen): Scenario details and start button

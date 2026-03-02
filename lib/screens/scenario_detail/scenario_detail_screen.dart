@@ -79,9 +79,25 @@ class ScenarioDetailScreen extends ConsumerWidget {
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  scenario.learningGoals,
-                  style: Theme.of(context).textTheme.bodyLarge,
+                ...scenario.learningGoals.map(
+                  (goal) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '• ',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                        Expanded(
+                          child: Text(
+                            goal,
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -154,8 +170,41 @@ class ScenarioDetailScreen extends ConsumerWidget {
           label: _getDifficultyText(scenario.difficulty),
           color: _getDifficultyColor(scenario.difficulty),
         ),
+        if (scenario.riskLevel != null)
+          _buildInfoChip(
+            context,
+            icon: Icons.warning_amber_rounded,
+            label: _getRiskLevelText(scenario.riskLevel!),
+            color: _getRiskLevelColor(scenario.riskLevel!),
+          ),
       ],
     );
+  }
+
+  String _getRiskLevelText(String riskLevel) {
+    switch (riskLevel) {
+      case 'low':
+        return '위험도 낮음';
+      case 'medium':
+        return '위험도 중간';
+      case 'high':
+        return '위험도 높음';
+      default:
+        return riskLevel;
+    }
+  }
+
+  Color _getRiskLevelColor(String riskLevel) {
+    switch (riskLevel) {
+      case 'low':
+        return AppColors.success;
+      case 'medium':
+        return AppColors.warning;
+      case 'high':
+        return AppColors.error;
+      default:
+        return AppColors.info;
+    }
   }
 
   Widget _buildInfoChip(

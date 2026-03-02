@@ -69,21 +69,55 @@ class ChatNotifier extends StateNotifier<AsyncValue<void>> {
 
       var systemPrompt = scenario.systemPrompt;
 
-      // Add difficulty-based progression guidelines
+      // 시나리오별 감정 변화 가이드라인(있으면 우선) + 난이도 기반 보조
+      final emotionRules = scenario.emotionTransitionRules;
+      if (emotionRules != null && emotionRules.isNotEmpty) {
+        systemPrompt += '\n\n=== 감정 상태 변화 가이드라인(본 시나리오) ===\n';
+        for (final rule in emotionRules) {
+          systemPrompt += '- $rule\n';
+        }
+      }
       final progressionGuide = _getProgressionGuideline(
         scenario.difficulty,
         currentSession.messages.length,
       );
       systemPrompt += '\n\n$progressionGuide';
 
+      // 점진성: 상담사 질문에 답할 때 새로운 정보는 한 번에 1개만
+      systemPrompt += '\n\n[점진성 룰] 상담사의 질문에 답할 때: 새로운 정보는 한 번에 1개만 추가하세요. '
+          '급하게 다 털어놓지 마세요.';
+
       if (scenario.exampleDialogue.isNotEmpty) {
-        final buffer = StringBuffer('\n\n대화 예시:\n');
+        final buffer = StringBuffer('\n\n[이상적 흐름] 대화 예시:\n');
         for (final turn in scenario.exampleDialogue) {
           final speaker = turn['sender'] == 'counselor' ? '상담원' : '학생';
           buffer.writeln('$speaker: ${turn['message']}');
         }
         buffer.write('\n위 예시를 참고하되, 똑같이 따라하지 말고 자연스럽게 대화하세요.');
         systemPrompt += buffer.toString();
+      }
+
+      if (scenario.exampleDialogueBadPath != null &&
+          scenario.exampleDialogueBadPath!.isNotEmpty) {
+        final buf = StringBuffer('\n\n[흔한 실수 시 학생 반응 예시]\n');
+        for (final turn in scenario.exampleDialogueBadPath!) {
+          final speaker = turn['sender'] == 'counselor' ? '상담원' : '학생';
+          buf.writeln('$speaker: ${turn['message']}');
+        }
+        buf.write(
+            '\n상담사가 위와 같은 실수(강요, 훈계, 무시 등)를 하면 학생은 방어/침묵/회피 반응을 보이세요.');
+        systemPrompt += buf.toString();
+      }
+
+      if (scenario.studentReactivityRules != null &&
+          scenario.studentReactivityRules!.isNotEmpty) {
+        final buf = StringBuffer('\n\n[발화 유형별 학생 반응 규칙]\n');
+        for (final r in scenario.studentReactivityRules!) {
+          final trigger = r['trigger'] ?? '';
+          final reaction = r['reaction'] ?? '';
+          buf.writeln('- 상담사가 "$trigger" 유형 말을 하면: $reaction');
+        }
+        systemPrompt += buf.toString();
       }
 
       final aiResponse = await gemini.generateAIResponse(
