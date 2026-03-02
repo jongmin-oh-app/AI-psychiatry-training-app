@@ -118,7 +118,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                             controller: _scrollController,
                             reverse: true,
                             // reverse이므로 bottom 패딩이 새 메시지 쪽(화면 하단) 여백
-                            padding: const EdgeInsets.only(top: 16, bottom: 88),
+                            // iOS safe area(홈 인디케이터) 높이를 더해 입력창에 가리지 않도록
+                            padding: EdgeInsets.only(
+                              top: 16,
+                              bottom: 88 + MediaQuery.of(context).padding.bottom,
+                            ),
                             itemCount: currentSession.messages.length + (isAITyping ? 1 : 0),
                             itemBuilder: (context, index) {
                               // Typing indicator is at index 0 when reverse=true
