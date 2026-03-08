@@ -6,7 +6,7 @@
   "navHistory": "History",
   "navAnalytics": "Analytics",
 
-  "homeAppBarTitle": "AI Counseling Training",
+  "homeAppBarTitle": "AI Psychiatry Training",
   "homeMyProgress": "My Progress",
   "homeProgressLabel": "Completed: {completed}/{total} scenarios ({percent}%)",
   "homeSectionIncomplete": "Scenarios to Practice",

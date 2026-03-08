@@ -46,7 +46,7 @@ class MyApp extends ConsumerWidget {
     final locale = ref.watch(localeProvider);
 
     return MaterialApp.router(
-      title: 'AI Counseling Training',
+      title: 'AI Psychiatry Training',
       theme: AppTheme.lightTheme,
       routerConfig: appRouter,
       locale: locale,

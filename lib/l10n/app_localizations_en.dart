@@ -21,7 +21,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navAnalytics => 'Analytics';
 
   @override
-  String get homeAppBarTitle => 'AI Counseling Training';
+  String get homeAppBarTitle => 'AI Psychiatry Training';
 
   @override
   String get homeMyProgress => 'My Progress';
