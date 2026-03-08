@@ -50,7 +50,7 @@ class MyApp extends ConsumerWidget {
       theme: AppTheme.lightTheme,
       routerConfig: appRouter,
       locale: locale,
-      supportedLocales: const [Locale('ko'), Locale('en')],
+      supportedLocales: const [Locale('en'), Locale('ko')],
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,

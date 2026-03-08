@@ -30,20 +30,20 @@ class LanguageDrawer extends ConsumerWidget {
               ),
             ),
             _LanguageTile(
-              flag: '🇰🇷',
-              label: l10n.settingsKorean,
-              isSelected: locale.languageCode == 'ko',
-              onTap: () {
-                ref.read(localeProvider.notifier).setLocale(const Locale('ko'));
-                Navigator.pop(context);
-              },
-            ),
-            _LanguageTile(
               flag: '🇺🇸',
               label: l10n.settingsEnglish,
               isSelected: locale.languageCode == 'en',
               onTap: () {
                 ref.read(localeProvider.notifier).setLocale(const Locale('en'));
+                Navigator.pop(context);
+              },
+            ),
+            _LanguageTile(
+              flag: '🇰🇷',
+              label: l10n.settingsKorean,
+              isSelected: locale.languageCode == 'ko',
+              onTap: () {
+                ref.read(localeProvider.notifier).setLocale(const Locale('ko'));
                 Navigator.pop(context);
               },
             ),
