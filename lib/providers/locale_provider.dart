@@ -18,10 +18,11 @@ class LocaleNotifier extends StateNotifier<Locale> {
   final SharedPreferences _prefs;
 
   void toggle() {
-    final next = state.languageCode == 'ko'
-        ? const Locale('en')
-        : const Locale('ko');
-    state = next;
-    _prefs.setString('app_locale', next.languageCode);
+    setLocale(state.languageCode == 'ko' ? const Locale('en') : const Locale('ko'));
+  }
+
+  void setLocale(Locale locale) {
+    state = locale;
+    _prefs.setString('app_locale', locale.languageCode);
   }
 }

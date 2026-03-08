@@ -16,6 +16,10 @@
   "homeError": "An error occurred\n{error}",
   "languageToggleLabel": "KO",
 
+  "settingsLanguage": "Language",
+  "settingsKorean": "한국어",
+  "settingsEnglish": "English",
+
   "loading": "Loading...",
   "errorWithMessage": "Error: {error}",
   "confirm": "OK",

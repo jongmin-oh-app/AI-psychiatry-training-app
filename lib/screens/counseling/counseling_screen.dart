@@ -17,9 +17,6 @@ class CounselingScreen extends ConsumerWidget {
     final sessions = ref.watch(activeSessionsProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.counselingTitle),
-      ),
       body: sessions.isEmpty
           ? _buildEmptyState(context, l10n)
           : ListView.builder(

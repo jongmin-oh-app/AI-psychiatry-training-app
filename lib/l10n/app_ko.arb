@@ -33,6 +33,10 @@
   },
   "languageToggleLabel": "EN",
 
+  "settingsLanguage": "언어 설정",
+  "settingsKorean": "한국어",
+  "settingsEnglish": "English",
+
   "loading": "로딩 중...",
   "errorWithMessage": "오류: {error}",
   "@errorWithMessage": {

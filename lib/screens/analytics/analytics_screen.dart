@@ -17,7 +17,6 @@ class AnalyticsScreen extends ConsumerWidget {
     final analytics = ref.watch(analyticsDataProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.analyticsTitle)),
       body: analytics == null
           ? _buildEmptyState(context, l10n)
           : SingleChildScrollView(

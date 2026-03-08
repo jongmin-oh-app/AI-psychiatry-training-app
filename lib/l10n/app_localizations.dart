@@ -176,6 +176,24 @@ abstract class AppLocalizations {
   /// **'EN'**
   String get languageToggleLabel;
 
+  /// No description provided for @settingsLanguage.
+  ///
+  /// In ko, this message translates to:
+  /// **'언어 설정'**
+  String get settingsLanguage;
+
+  /// No description provided for @settingsKorean.
+  ///
+  /// In ko, this message translates to:
+  /// **'한국어'**
+  String get settingsKorean;
+
+  /// No description provided for @settingsEnglish.
+  ///
+  /// In ko, this message translates to:
+  /// **'English'**
+  String get settingsEnglish;
+
   /// No description provided for @loading.
   ///
   /// In ko, this message translates to:

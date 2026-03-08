@@ -54,6 +54,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get languageToggleLabel => 'KO';
 
   @override
+  String get settingsLanguage => 'Language';
+
+  @override
+  String get settingsKorean => '한국어';
+
+  @override
+  String get settingsEnglish => 'English';
+
+  @override
   String get loading => 'Loading...';
 
   @override

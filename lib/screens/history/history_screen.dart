@@ -17,9 +17,6 @@ class HistoryScreen extends ConsumerWidget {
     final sessions = ref.watch(completedSessionsProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.historyTitle),
-      ),
       body: sessions.isEmpty
           ? _buildEmptyState(context, l10n)
           : ListView.builder(

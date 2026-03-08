@@ -3,7 +3,6 @@ import 'package:psychiatry_training/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/scenario_provider.dart';
-import '../../providers/locale_provider.dart';
 import '../../widgets/scenario_card.dart';
 import '../../core/constants/colors.dart';
 
@@ -17,15 +16,6 @@ class HomeScreen extends ConsumerWidget {
     final completedCount = ref.watch(completedScenarioCountProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.homeAppBarTitle),
-        actions: [
-          TextButton(
-            onPressed: () => ref.read(localeProvider.notifier).toggle(),
-            child: Text(l10n.languageToggleLabel),
-          ),
-        ],
-      ),
       body: scenariosAsync.when(
         data: (scenarios) {
           final totalCount = scenarios.length;
