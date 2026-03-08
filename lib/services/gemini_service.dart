@@ -147,39 +147,44 @@ class GeminiService {
   /// 피드백은 전체 JSON이 필요하므로 generateContent 유지, 요청 형식만 통일
   Future<Map<String, dynamic>> generateFeedback({
     required List<Map<String, String>> conversationHistory,
+    String languageCode = 'ko',
   }) async {
-    final conversationText = StringBuffer('=== 상담 대화 내역 ===\n');
+    final conversationText = StringBuffer('=== Counseling Conversation ===\n');
     for (var message in conversationHistory) {
-      final speaker = message['sender'] == 'user' ? '상담원' : 'AI 학생';
+      final speaker = message['sender'] == 'user' ? 'Counselor' : 'AI Student';
       conversationText.writeln('$speaker: ${message['content']}');
     }
 
+    final languageInstruction = languageCode == 'en'
+        ? 'Write all feedback text fields (goodPoints, improvements) in English.'
+        : '모든 피드백 텍스트 필드(goodPoints, improvements)를 한국어로 작성해주세요.';
+
     final feedbackPrompt =
         '''
-다음 상담 대화를 분석하고 피드백을 제공해주세요.
+Analyze the following counseling conversation and provide feedback.
 
 ${conversationText.toString()}
 
-평가 기준:
-1. 공감 표현 (1-5점): 상담원이 학생의 감정을 얼마나 잘 이해하고 공감했는가
-2. 경청 능력 (1-5점): 학생의 이야기를 잘 듣고 적절한 질문을 했는가
-3. 질문의 적절성 (1-5점): 질문이 대화를 이어가는 데 도움이 되었는가
-4. 해결책 제안 (1-5점): 실질적이고 적절한 도움을 제공했는가
+Evaluation criteria:
+1. Empathy (1-5): How well did the counselor understand and empathize with the student's emotions?
+2. Active Listening (1-5): Did the counselor listen attentively and ask appropriate questions?
+3. Question Quality (1-5): Did the questions help advance the conversation constructively?
+4. Solution Offering (1-5): Did the counselor provide practical and appropriate support?
 
-출력 형식은 다음 JSON 형식으로 작성해주세요:
+Output ONLY the following JSON format, with no additional explanation:
 {
   "scores": {
-    "empathy": 점수(1-5),
-    "listening": 점수(1-5),
-    "questioning": 점수(1-5),
-    "solution": 점수(1-5)
+    "empathy": <number 1-5>,
+    "listening": <number 1-5>,
+    "questioning": <number 1-5>,
+    "solution": <number 1-5>
   },
-  "goodPoints": "잘한 점을 구체적으로 2-3문장",
-  "improvements": "개선할 점을 구체적으로 2-3문장",
-  "recommendedScenarios": ["추천 시나리오 ID"]
+  "goodPoints": "<2-3 sentences describing strengths>",
+  "improvements": "<2-3 sentences describing areas for improvement>",
+  "recommendedScenarios": ["<scenario id>"]
 }
 
-JSON만 출력하고 다른 설명은 하지 마세요.
+$languageInstruction
 ''';
 
     final body = _buildRequestBody(

@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 import '../models/chat_message.dart';
 import '../models/feedback.dart' as model;
 import '../services/gemini_service.dart';
+import 'locale_provider.dart';
 import 'session_provider.dart';
 import 'scenario_provider.dart';
 
@@ -281,8 +282,10 @@ class ChatNotifier extends StateNotifier<AsyncValue<void>> {
         };
       }).toList();
 
+      final languageCode = ref.read(localeProvider).languageCode;
       final feedbackData = await gemini.generateFeedback(
         conversationHistory: conversationHistory,
+        languageCode: languageCode,
       );
 
       final uuid = const Uuid();
