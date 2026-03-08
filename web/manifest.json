@@ -1,6 +1,6 @@
 {
-    "name": "AI Psychiatry Training",
-    "short_name": "AI Psychiatry Training",
+    "name": "CounselAI",
+    "short_name": "CounselAI",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
