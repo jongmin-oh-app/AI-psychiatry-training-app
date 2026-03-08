@@ -1,6 +1,6 @@
 {
-    "name": "psychiatry_training",
-    "short_name": "psychiatry_training",
+    "name": "AI Psychiatry Training",
+    "short_name": "AI Psychiatry Training",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
