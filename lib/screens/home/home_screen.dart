@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:psychiatry_training/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/scenario_provider.dart';
+import '../../providers/locale_provider.dart';
 import '../../widgets/scenario_card.dart';
 import '../../core/constants/colors.dart';
 
@@ -10,12 +12,19 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final scenariosAsync = ref.watch(scenariosProvider);
     final completedCount = ref.watch(completedScenarioCountProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('AI 상담 트레이닝'),
+        title: Text(l10n.homeAppBarTitle),
+        actions: [
+          TextButton(
+            onPressed: () => ref.read(localeProvider.notifier).toggle(),
+            child: Text(l10n.languageToggleLabel),
+          ),
+        ],
       ),
       body: scenariosAsync.when(
         data: (scenarios) {
@@ -36,6 +45,7 @@ class HomeScreen extends ConsumerWidget {
               SliverToBoxAdapter(
                 child: _buildProgressSection(
                   context,
+                  l10n,
                   completedCount,
                   totalCount,
                 ),
@@ -43,7 +53,7 @@ class HomeScreen extends ConsumerWidget {
               if (incompleteScenarios.isNotEmpty) ...[
                 SliverToBoxAdapter(
                   child: _SectionHeader(
-                    title: '연습할 시나리오',
+                    title: l10n.homeSectionIncomplete,
                     count: incompleteScenarios.length,
                     isCompleted: false,
                   ),
@@ -65,7 +75,7 @@ class HomeScreen extends ConsumerWidget {
               if (completedScenarios.isNotEmpty) ...[
                 SliverToBoxAdapter(
                   child: _SectionHeader(
-                    title: '완료한 시나리오',
+                    title: l10n.homeSectionCompleted,
                     count: completedScenarios.length,
                     isCompleted: true,
                   ),
@@ -85,8 +95,8 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ],
               if (scenarios.isEmpty)
-                const SliverFillRemaining(
-                  child: Center(child: Text('시나리오가 없습니다')),
+                SliverFillRemaining(
+                  child: Center(child: Text(l10n.homeNoScenarios)),
                 ),
               const SliverToBoxAdapter(child: SizedBox(height: 24)),
             ],
@@ -105,7 +115,7 @@ class HomeScreen extends ConsumerWidget {
                 color: AppColors.error,
               ),
               const SizedBox(height: 16),
-              Text('오류가 발생했습니다\n$error'),
+              Text(l10n.homeError(error.toString())),
             ],
           ),
         ),
@@ -115,10 +125,12 @@ class HomeScreen extends ConsumerWidget {
 
   Widget _buildProgressSection(
     BuildContext context,
+    AppLocalizations l10n,
     int completed,
     int total,
   ) {
     final progress = total > 0 ? completed / total : 0.0;
+    final percent = (progress * 100).toStringAsFixed(0);
 
     return Container(
       margin: const EdgeInsets.all(16),
@@ -138,7 +150,7 @@ class HomeScreen extends ConsumerWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                '나의 진행도',
+                l10n.homeMyProgress,
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
             ],
@@ -157,7 +169,7 @@ class HomeScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            '완료: $completed/$total 시나리오 (${(progress * 100).toStringAsFixed(0)}%)',
+            l10n.homeProgressLabel(completed, total, percent),
             style: Theme.of(context).textTheme.bodyMedium,
           ),
         ],
@@ -213,7 +225,7 @@ class _SectionHeader extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              '$count개',
+              '$count',
               style: TextStyle(
                 fontSize: 12,
                 color: isCompleted

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:psychiatry_training/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/scenario.dart';
@@ -16,33 +17,39 @@ class ScenarioDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final scenarioAsync = ref.watch(scenarioByIdProvider(scenarioId));
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('시나리오 정보'),
+        title: Text(l10n.scenarioDetailTitle),
       ),
       body: scenarioAsync.when(
         data: (scenario) {
           if (scenario == null) {
-            return const Center(
-              child: Text('시나리오를 찾을 수 없습니다'),
+            return Center(
+              child: Text(l10n.scenarioNotFound),
             );
           }
 
-          return _buildContent(context, ref, scenario);
+          return _buildContent(context, ref, scenario, l10n);
         },
         loading: () => const Center(
           child: CircularProgressIndicator(),
         ),
         error: (error, stack) => Center(
-          child: Text('오류: $error'),
+          child: Text(l10n.errorWithMessage(error.toString())),
         ),
       ),
     );
   }
 
-  Widget _buildContent(BuildContext context, WidgetRef ref, Scenario scenario) {
+  Widget _buildContent(
+    BuildContext context,
+    WidgetRef ref,
+    Scenario scenario,
+    AppLocalizations l10n,
+  ) {
     final activeSessions = ref.watch(activeSessionsProvider);
     final activeSession = activeSessions
         .where((s) => s.scenarioId == scenario.id)
@@ -62,10 +69,10 @@ class ScenarioDetailScreen extends ConsumerWidget {
                   style: Theme.of(context).textTheme.headlineLarge,
                 ),
                 const SizedBox(height: 8),
-                _buildMetaInfo(context, scenario),
+                _buildMetaInfo(context, scenario, l10n),
                 const Divider(height: 32),
                 Text(
-                  '배경',
+                  l10n.scenarioBackground,
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
                 const SizedBox(height: 8),
@@ -75,7 +82,7 @@ class ScenarioDetailScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  '학습 목표',
+                  l10n.scenarioLearningGoals,
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
                 const SizedBox(height: 8),
@@ -129,7 +136,7 @@ class ScenarioDetailScreen extends ConsumerWidget {
                             .resumeSession(activeSession.first);
                         context.push('/chat');
                       },
-                      child: const Text('이어하기'),
+                      child: Text(l10n.scenarioResume),
                     ),
                   ),
                 ElevatedButton(
@@ -139,7 +146,7 @@ class ScenarioDetailScreen extends ConsumerWidget {
                         .startSession(scenario.id, greeting: scenario.getRandomGreeting());
                     context.push('/chat');
                   },
-                  child: const Text('훈련 시작'),
+                  child: Text(l10n.scenarioStart),
                 ),
               ],
             ),
@@ -149,7 +156,11 @@ class ScenarioDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildMetaInfo(BuildContext context, Scenario scenario) {
+  Widget _buildMetaInfo(
+    BuildContext context,
+    Scenario scenario,
+    AppLocalizations l10n,
+  ) {
     return Wrap(
       spacing: 16,
       runSpacing: 8,
@@ -162,33 +173,33 @@ class ScenarioDetailScreen extends ConsumerWidget {
         _buildInfoChip(
           context,
           icon: Icons.access_time,
-          label: '${scenario.estimatedTime}분',
+          label: l10n.estimatedTimeMinutes(scenario.estimatedTime),
         ),
         _buildInfoChip(
           context,
           icon: Icons.signal_cellular_alt,
-          label: _getDifficultyText(scenario.difficulty),
+          label: _getDifficultyText(l10n, scenario.difficulty),
           color: _getDifficultyColor(scenario.difficulty),
         ),
         if (scenario.riskLevel != null)
           _buildInfoChip(
             context,
             icon: Icons.warning_amber_rounded,
-            label: _getRiskLevelText(scenario.riskLevel!),
+            label: _getRiskLevelText(l10n, scenario.riskLevel!),
             color: _getRiskLevelColor(scenario.riskLevel!),
           ),
       ],
     );
   }
 
-  String _getRiskLevelText(String riskLevel) {
+  String _getRiskLevelText(AppLocalizations l10n, String riskLevel) {
     switch (riskLevel) {
       case 'low':
-        return '위험도 낮음';
+        return l10n.riskLow;
       case 'medium':
-        return '위험도 중간';
+        return l10n.riskMedium;
       case 'high':
-        return '위험도 높음';
+        return l10n.riskHigh;
       default:
         return riskLevel;
     }
@@ -224,14 +235,14 @@ class ScenarioDetailScreen extends ConsumerWidget {
     );
   }
 
-  String _getDifficultyText(String difficulty) {
+  String _getDifficultyText(AppLocalizations l10n, String difficulty) {
     switch (difficulty) {
       case 'beginner':
-        return '초급';
+        return l10n.difficultyBeginner;
       case 'intermediate':
-        return '중급';
+        return l10n.difficultyIntermediate;
       case 'advanced':
-        return '고급';
+        return l10n.difficultyAdvanced;
       default:
         return difficulty;
     }

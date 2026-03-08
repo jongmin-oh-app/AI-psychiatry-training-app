@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:psychiatry_training/l10n/app_localizations.dart';
 import '../../../core/constants/colors.dart';
 import '../../../providers/analytics_provider.dart';
 
@@ -26,12 +27,10 @@ class _ImprovementLineChartState extends State<ImprovementLineChart>
     AppColors.error,
   ];
 
-  static const _tabLabels = ['공감 표현', '경청 능력', '질문 기술', '해결 방안'];
-
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: _tabLabels.length, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     _tabController.addListener(() => setState(() {}));
   }
 
@@ -45,6 +44,14 @@ class _ImprovementLineChartState extends State<ImprovementLineChart>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final tabLabels = [
+      l10n.chartTabEmpathy,
+      l10n.chartTabListening,
+      l10n.chartTabQuestioning,
+      l10n.chartTabSolution,
+    ];
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -52,14 +59,14 @@ class _ImprovementLineChartState extends State<ImprovementLineChart>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '점수 추이',
+              l10n.chartTitle,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
             ),
             const SizedBox(height: 8),
             if (widget.scoreHistory.length < 2)
-              _buildNotEnoughData(context)
+              _buildNotEnoughData(context, l10n)
             else ...[
               TabBar(
                 controller: _tabController,
@@ -73,14 +80,12 @@ class _ImprovementLineChartState extends State<ImprovementLineChart>
                   fontWeight: FontWeight.w600,
                 ),
                 unselectedLabelStyle: const TextStyle(fontSize: 12),
-                tabs: _tabLabels
-                    .map((label) => Tab(text: label))
-                    .toList(),
+                tabs: tabLabels.map((label) => Tab(text: label)).toList(),
               ),
               const SizedBox(height: 16),
               SizedBox(
                 height: 200,
-                child: LineChart(_buildChart()),
+                child: LineChart(_buildChart(l10n)),
               ),
             ],
           ],
@@ -89,12 +94,12 @@ class _ImprovementLineChartState extends State<ImprovementLineChart>
     );
   }
 
-  Widget _buildNotEnoughData(BuildContext context) {
+  Widget _buildNotEnoughData(BuildContext context, AppLocalizations l10n) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 32),
       child: Center(
         child: Text(
-          '2회 이상 훈련을 완료하면 추이 그래프가 표시됩니다.',
+          l10n.chartNotEnoughData,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: AppColors.secondaryText,
               ),
@@ -103,7 +108,7 @@ class _ImprovementLineChartState extends State<ImprovementLineChart>
     );
   }
 
-  LineChartData _buildChart() {
+  LineChartData _buildChart(AppLocalizations l10n) {
     final selectedTab = _tabController.index;
     final maxX = (widget.scoreHistory.length - 1).toDouble();
 
@@ -154,7 +159,7 @@ class _ImprovementLineChartState extends State<ImprovementLineChart>
                 return const SizedBox.shrink();
               }
               return Text(
-                '${idx + 1}회',
+                l10n.chartSessionNumber(idx + 1),
                 style: const TextStyle(
                   fontSize: 10,
                   color: AppColors.secondaryText,

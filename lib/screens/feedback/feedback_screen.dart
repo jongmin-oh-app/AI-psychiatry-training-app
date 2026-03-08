@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:psychiatry_training/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/training_session.dart';
@@ -16,22 +17,23 @@ class FeedbackScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final feedback = session.feedback;
 
     if (feedback == null) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('피드백'),
+          title: Text(l10n.feedbackTitle),
         ),
-        body: const Center(
-          child: Text('피드백이 없습니다'),
+        body: Center(
+          child: Text(l10n.feedbackNone),
         ),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('훈련 완료'),
+        title: Text(l10n.feedbackCompleteTitle),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
@@ -50,17 +52,17 @@ class FeedbackScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildCongratulationsCard(context),
+            _buildCongratulationsCard(context, l10n),
             const SizedBox(height: 24),
             Text(
-              '평가 결과',
+              l10n.feedbackEvaluationResults,
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             const SizedBox(height: 16),
-            _buildScoresSection(context, feedback.scores),
+            _buildScoresSection(context, l10n, feedback.scores),
             const SizedBox(height: 24),
             Text(
-              '잘한 점',
+              l10n.feedbackGoodPoints,
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             const SizedBox(height: 8),
@@ -71,7 +73,7 @@ class FeedbackScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              '개선할 점',
+              l10n.feedbackImprovements,
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             const SizedBox(height: 8),
@@ -89,7 +91,7 @@ class FeedbackScreen extends ConsumerWidget {
                     context.push('/conversation-history', extra: session.messages);
                   },
                   icon: const Icon(Icons.chat_outlined),
-                  label: const Text('대화 내역 보기'),
+                  label: Text(l10n.feedbackViewHistory),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     side: const BorderSide(color: AppColors.primaryBlue),
@@ -105,7 +107,7 @@ class FeedbackScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildCongratulationsCard(BuildContext context) {
+  Widget _buildCongratulationsCard(BuildContext context, AppLocalizations l10n) {
     return Card(
       color: AppColors.primaryBlue.withOpacity(0.1),
       child: Padding(
@@ -123,14 +125,14 @@ class FeedbackScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '훈련 완료!',
+                    l10n.feedbackCongrats,
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           color: AppColors.primaryBlue,
                         ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '수고하셨습니다',
+                    l10n.feedbackWellDone,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],
@@ -142,19 +144,23 @@ class FeedbackScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildScoresSection(BuildContext context, Map<String, int> scores) {
+  Widget _buildScoresSection(
+    BuildContext context,
+    AppLocalizations l10n,
+    Map<String, int> scores,
+  ) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            _buildScoreRow(context, '공감 표현', scores['empathy'] ?? 0),
+            _buildScoreRow(context, l10n.categoryEmpathy, scores['empathy'] ?? 0),
             const Divider(),
-            _buildScoreRow(context, '경청 능력', scores['listening'] ?? 0),
+            _buildScoreRow(context, l10n.categoryListening, scores['listening'] ?? 0),
             const Divider(),
-            _buildScoreRow(context, '질문 적절성', scores['questioning'] ?? 0),
+            _buildScoreRow(context, l10n.categoryQuestioning, scores['questioning'] ?? 0),
             const Divider(),
-            _buildScoreRow(context, '해결책 제안', scores['solution'] ?? 0),
+            _buildScoreRow(context, l10n.categorySolution, scores['solution'] ?? 0),
           ],
         ),
       ),
@@ -205,5 +211,4 @@ class FeedbackScreen extends ConsumerWidget {
       ),
     );
   }
-
 }

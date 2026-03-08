@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:psychiatry_training/l10n/app_localizations.dart';
 import '../../../core/constants/colors.dart';
 import '../../../providers/analytics_provider.dart';
 
@@ -9,6 +10,8 @@ class ScoreSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -16,7 +19,7 @@ class ScoreSummaryCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '훈련 요약',
+              l10n.summaryTitle,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -27,15 +30,15 @@ class ScoreSummaryCard extends StatelessWidget {
                 Expanded(
                   child: _SummaryItem(
                     icon: Icons.school,
-                    label: '총 훈련',
-                    value: '${data.totalSessions}회',
+                    label: l10n.summaryTotalSessions,
+                    value: l10n.sessionCount(data.totalSessions),
                     color: AppColors.primaryBlue,
                   ),
                 ),
                 Expanded(
                   child: _SummaryItem(
                     icon: Icons.star,
-                    label: '평균 점수',
+                    label: l10n.summaryAverageScore,
                     value: data.overallAverage.toStringAsFixed(1),
                     color: AppColors.accent,
                   ),
@@ -43,7 +46,7 @@ class ScoreSummaryCard extends StatelessWidget {
                 Expanded(
                   child: _SummaryItem(
                     icon: Icons.trending_up,
-                    label: '개선율',
+                    label: l10n.summaryImprovementRate,
                     value: data.improvementRate != null
                         ? '${data.improvementRate! >= 0 ? '+' : ''}'
                             '${data.improvementRate!.toStringAsFixed(1)}%'

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/scenario.dart';
 import '../services/storage_service.dart';
+import 'locale_provider.dart';
 
 // StorageService Provider
 final storageServiceProvider = Provider<StorageService>((ref) {
@@ -12,7 +13,12 @@ final storageServiceProvider = Provider<StorageService>((ref) {
 
 // Scenario list Provider
 final scenariosProvider = FutureProvider<List<Scenario>>((ref) async {
-  final jsonString = await rootBundle.loadString('assets/scenarios/scenarios.json');
+  final locale = ref.watch(localeProvider);
+  final file = locale.languageCode == 'en'
+      ? 'assets/scenarios/scenarios_en.json'
+      : 'assets/scenarios/scenarios_ko.json';
+
+  final jsonString = await rootBundle.loadString(file);
   final jsonList = jsonDecode(jsonString) as List;
 
   return jsonList.map((json) => Scenario.fromJson(json as Map<String, dynamic>)).toList();

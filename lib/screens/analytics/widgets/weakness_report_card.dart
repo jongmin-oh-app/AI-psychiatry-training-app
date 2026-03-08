@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:psychiatry_training/l10n/app_localizations.dart';
 import '../../../core/constants/colors.dart';
 import '../../../providers/analytics_provider.dart';
 
@@ -9,6 +10,8 @@ class WeaknessReportCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     if (weaknesses.isEmpty) {
       return Card(
         child: Padding(
@@ -17,7 +20,7 @@ class WeaknessReportCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '취약점 분석',
+                l10n.weaknessTitle,
                 style:
                     Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
@@ -33,7 +36,7 @@ class WeaknessReportCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      '모든 항목에서 우수한 성과를 보이고 있습니다!',
+                      l10n.weaknessAllGood,
                       style: Theme.of(context)
                           .textTheme
                           .bodyMedium
@@ -55,14 +58,14 @@ class WeaknessReportCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '취약점 분석',
+              l10n.weaknessTitle,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
             ),
             const SizedBox(height: 4),
             Text(
-              '4.0 미만인 항목을 개선해보세요',
+              l10n.weaknessHint,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: AppColors.secondaryText,
                   ),
@@ -83,8 +86,26 @@ class _WeaknessRow extends StatelessWidget {
 
   const _WeaknessRow({required this.item});
 
+  String _label(AppLocalizations l10n) => switch (item.key) {
+        'empathy' => l10n.categoryEmpathy,
+        'listening' => l10n.categoryListening,
+        'questioning' => l10n.categoryQuestioning,
+        'solution' => l10n.categorySolution,
+        _ => item.label,
+      };
+
+  String _recommendation(AppLocalizations l10n) => switch (item.key) {
+        'empathy' => l10n.weaknessEmpathy,
+        'listening' => l10n.weaknessListening,
+        'questioning' => l10n.weaknessQuestioning,
+        'solution' => l10n.weaknessSolution,
+        _ => item.recommendation,
+      };
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -111,7 +132,7 @@ class _WeaknessRow extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      item.label,
+                      _label(l10n),
                       style: Theme.of(context)
                           .textTheme
                           .bodyMedium
@@ -130,7 +151,7 @@ class _WeaknessRow extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  item.recommendation,
+                  _recommendation(l10n),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: AppColors.secondaryText,
                       ),

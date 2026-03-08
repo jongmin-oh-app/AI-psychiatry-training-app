@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:psychiatry_training/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -12,26 +13,27 @@ class CounselingScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final sessions = ref.watch(activeSessionsProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('진행 중 상담'),
+        title: Text(l10n.counselingTitle),
       ),
       body: sessions.isEmpty
-          ? _buildEmptyState(context)
+          ? _buildEmptyState(context, l10n)
           : ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: sessions.length,
               itemBuilder: (context, index) {
                 final session = sessions[index];
-                return _buildSessionCard(context, ref, session);
+                return _buildSessionCard(context, ref, session, l10n);
               },
             ),
     );
   }
 
-  Widget _buildEmptyState(BuildContext context) {
+  Widget _buildEmptyState(BuildContext context, AppLocalizations l10n) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -43,14 +45,14 @@ class CounselingScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            '진행 중인 상담이 없습니다',
+            l10n.counselingEmpty,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color: AppColors.secondaryText,
                 ),
           ),
           const SizedBox(height: 8),
           Text(
-            '시나리오에서 새 상담을 시작해보세요!',
+            l10n.counselingEmptyHint,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: AppColors.hintText,
                 ),
@@ -61,16 +63,20 @@ class CounselingScreen extends ConsumerWidget {
   }
 
   void _showDeleteDialog(
-      BuildContext context, WidgetRef ref, TrainingSession session) {
+    BuildContext context,
+    WidgetRef ref,
+    TrainingSession session,
+    AppLocalizations l10n,
+  ) {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('채팅방 나가기'),
-        content: const Text('이 상담을 삭제하시겠습니까?\n대화 내용이 모두 사라집니다.'),
+        title: Text(l10n.counselingExitDialogTitle),
+        content: Text(l10n.counselingDeleteContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('취소'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -83,7 +89,7 @@ class CounselingScreen extends ConsumerWidget {
               storage.deleteSession(session.id);
               ref.invalidate(activeSessionsProvider);
             },
-            child: const Text('나가기'),
+            child: Text(l10n.exitLabel),
           ),
         ],
       ),
@@ -91,7 +97,11 @@ class CounselingScreen extends ConsumerWidget {
   }
 
   Widget _buildSessionCard(
-      BuildContext context, WidgetRef ref, TrainingSession session) {
+    BuildContext context,
+    WidgetRef ref,
+    TrainingSession session,
+    AppLocalizations l10n,
+  ) {
     final scenarioAsync = ref.watch(scenarioByIdProvider(session.scenarioId));
 
     return Card(
@@ -112,11 +122,11 @@ class CounselingScreen extends ConsumerWidget {
                   Expanded(
                     child: scenarioAsync.when(
                       data: (scenario) => Text(
-                        scenario?.title ?? '시나리오',
+                        scenario?.title ?? l10n.scenarioLabel,
                         style: Theme.of(context).textTheme.headlineMedium,
                       ),
-                      loading: () => const Text('로딩 중...'),
-                      error: (_, __) => const Text('시나리오'),
+                      loading: () => Text(l10n.loading),
+                      error: (_, __) => Text(l10n.scenarioLabel),
                     ),
                   ),
                   Container(
@@ -126,9 +136,9 @@ class CounselingScreen extends ConsumerWidget {
                       color: AppColors.primaryBlue.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: const Text(
-                      '진행 중',
-                      style: TextStyle(
+                    child: Text(
+                      l10n.counselingInProgress,
+                      style: const TextStyle(
                         color: AppColors.primaryBlue,
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
@@ -139,10 +149,11 @@ class CounselingScreen extends ConsumerWidget {
                   IconButton(
                     icon: const Icon(Icons.exit_to_app, size: 20),
                     color: AppColors.error,
-                    tooltip: '채팅방 나가기',
+                    tooltip: l10n.counselingExitDialogTitle,
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
-                    onPressed: () => _showDeleteDialog(context, ref, session),
+                    onPressed: () =>
+                        _showDeleteDialog(context, ref, session, l10n),
                   ),
                 ],
               ),
@@ -167,7 +178,7 @@ class CounselingScreen extends ConsumerWidget {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    '${session.messages.length}개 메시지',
+                    l10n.messageCount(session.messages.length),
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:psychiatry_training/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/colors.dart';
 import '../../providers/analytics_provider.dart';
@@ -12,12 +13,13 @@ class AnalyticsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final analytics = ref.watch(analyticsDataProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('분석 대시보드')),
+      appBar: AppBar(title: Text(l10n.analyticsTitle)),
       body: analytics == null
-          ? _buildEmptyState(context)
+          ? _buildEmptyState(context, l10n)
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -42,7 +44,7 @@ class AnalyticsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context) {
+  Widget _buildEmptyState(BuildContext context, AppLocalizations l10n) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -54,14 +56,14 @@ class AnalyticsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            '완료된 훈련이 없습니다',
+            l10n.analyticsEmpty,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color: AppColors.secondaryText,
                 ),
           ),
           const SizedBox(height: 8),
           Text(
-            '훈련을 완료하면 분석 결과를 확인할 수 있습니다.',
+            l10n.analyticsEmptyHint,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: AppColors.hintText,
                 ),

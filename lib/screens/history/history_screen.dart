@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:psychiatry_training/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -12,26 +13,27 @@ class HistoryScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final sessions = ref.watch(completedSessionsProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('훈련 기록'),
+        title: Text(l10n.historyTitle),
       ),
       body: sessions.isEmpty
-          ? _buildEmptyState(context)
+          ? _buildEmptyState(context, l10n)
           : ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: sessions.length,
               itemBuilder: (context, index) {
                 final session = sessions[index];
-                return _buildSessionCard(context, ref, session);
+                return _buildSessionCard(context, ref, session, l10n);
               },
             ),
     );
   }
 
-  Widget _buildEmptyState(BuildContext context) {
+  Widget _buildEmptyState(BuildContext context, AppLocalizations l10n) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -43,14 +45,14 @@ class HistoryScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            '훈련 기록이 없습니다',
+            l10n.historyEmpty,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color: AppColors.secondaryText,
                 ),
           ),
           const SizedBox(height: 8),
           Text(
-            '첫 훈련을 시작해보세요!',
+            l10n.historyEmptyHint,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: AppColors.hintText,
                 ),
@@ -60,7 +62,12 @@ class HistoryScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSessionCard(BuildContext context, WidgetRef ref, TrainingSession session) {
+  Widget _buildSessionCard(
+    BuildContext context,
+    WidgetRef ref,
+    TrainingSession session,
+    AppLocalizations l10n,
+  ) {
     final scenarioAsync = ref.watch(scenarioByIdProvider(session.scenarioId));
     final feedback = session.feedback;
     final averageScore = feedback?.averageScore ?? 0;
@@ -82,11 +89,11 @@ class HistoryScreen extends ConsumerWidget {
                   Expanded(
                     child: scenarioAsync.when(
                       data: (scenario) => Text(
-                        scenario?.title ?? '시나리오',
+                        scenario?.title ?? l10n.scenarioLabel,
                         style: Theme.of(context).textTheme.headlineMedium,
                       ),
-                      loading: () => const Text('로딩 중...'),
-                      error: (_, __) => const Text('시나리오'),
+                      loading: () => Text(l10n.loading),
+                      error: (_, __) => Text(l10n.scenarioLabel),
                     ),
                   ),
                   _buildScoreBadge(context, averageScore),
@@ -113,7 +120,7 @@ class HistoryScreen extends ConsumerWidget {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    '${session.messages.length}개 메시지',
+                    l10n.messageCount(session.messages.length),
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],

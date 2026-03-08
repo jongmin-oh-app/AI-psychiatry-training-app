@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:psychiatry_training/l10n/app_localizations.dart';
 import '../models/scenario.dart';
 import '../core/constants/colors.dart';
 
@@ -16,6 +17,8 @@ class ScenarioCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       color: isCompleted ? const Color(0xFFF5F5F5) : Colors.white,
@@ -39,7 +42,7 @@ class ScenarioCard extends StatelessWidget {
                           ),
                     ),
                   ),
-                  _buildDifficultyBadge(context),
+                  _buildDifficultyBadge(context, l10n),
                 ],
               ),
               const SizedBox(height: 8),
@@ -65,7 +68,7 @@ class ScenarioCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    '${scenario.estimatedTime}분',
+                    l10n.estimatedTimeMinutes(scenario.estimatedTime),
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: isCompleted
                               ? AppColors.hintText
@@ -73,7 +76,7 @@ class ScenarioCard extends StatelessWidget {
                         ),
                   ),
                   const Spacer(),
-                  if (isCompleted) _CompletedCta() else _IncompleteCta(),
+                  if (isCompleted) _CompletedCta(l10n: l10n) else _IncompleteCta(l10n: l10n),
                 ],
               ),
             ],
@@ -83,22 +86,22 @@ class ScenarioCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDifficultyBadge(BuildContext context) {
+  Widget _buildDifficultyBadge(BuildContext context, AppLocalizations l10n) {
     Color color;
     String text;
 
     switch (scenario.difficulty) {
       case 'beginner':
         color = AppColors.success;
-        text = '초급';
+        text = l10n.difficultyBeginner;
         break;
       case 'intermediate':
         color = AppColors.warning;
-        text = '중급';
+        text = l10n.difficultyIntermediate;
         break;
       case 'advanced':
         color = AppColors.error;
-        text = '고급';
+        text = l10n.difficultyAdvanced;
         break;
       default:
         color = AppColors.info;
@@ -125,22 +128,24 @@ class ScenarioCard extends StatelessWidget {
 }
 
 class _IncompleteCta extends StatelessWidget {
-  const _IncompleteCta();
+  final AppLocalizations l10n;
+
+  const _IncompleteCta({required this.l10n});
 
   @override
   Widget build(BuildContext context) {
-    return const Row(
+    return Row(
       children: [
         Text(
-          '시작하기',
-          style: TextStyle(
+          l10n.startLabel,
+          style: const TextStyle(
             color: AppColors.primaryBlue,
             fontSize: 13,
             fontWeight: FontWeight.w600,
           ),
         ),
-        SizedBox(width: 2),
-        Icon(
+        const SizedBox(width: 2),
+        const Icon(
           Icons.arrow_forward_ios,
           size: 11,
           color: AppColors.primaryBlue,
@@ -151,28 +156,30 @@ class _IncompleteCta extends StatelessWidget {
 }
 
 class _CompletedCta extends StatelessWidget {
-  const _CompletedCta();
+  final AppLocalizations l10n;
+
+  const _CompletedCta({required this.l10n});
 
   @override
   Widget build(BuildContext context) {
-    return const Row(
+    return Row(
       children: [
-        Icon(Icons.check_circle, size: 15, color: AppColors.success),
-        SizedBox(width: 4),
+        const Icon(Icons.check_circle, size: 15, color: AppColors.success),
+        const SizedBox(width: 4),
         Text(
-          '완료',
-          style: TextStyle(
+          l10n.completedLabel,
+          style: const TextStyle(
             color: AppColors.success,
             fontSize: 13,
             fontWeight: FontWeight.w600,
           ),
         ),
-        SizedBox(width: 10),
-        Icon(Icons.refresh, size: 14, color: AppColors.hintText),
-        SizedBox(width: 3),
+        const SizedBox(width: 10),
+        const Icon(Icons.refresh, size: 14, color: AppColors.hintText),
+        const SizedBox(width: 3),
         Text(
-          '다시 연습',
-          style: TextStyle(color: AppColors.hintText, fontSize: 12),
+          l10n.retryLabel,
+          style: const TextStyle(color: AppColors.hintText, fontSize: 12),
         ),
       ],
     );

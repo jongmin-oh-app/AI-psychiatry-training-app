@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:psychiatry_training/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/training_session.dart';
@@ -26,7 +27,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    // 첫 프레임 렌더 후 포커스 요청 → 가상 키보드 표시 (iOS/Android)
+    // Request focus after first frame → show virtual keyboard (iOS/Android)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Future.delayed(const Duration(milliseconds: 300), () {
         if (mounted) {
@@ -44,7 +45,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     super.dispose();
   }
 
-  /// reverse: true이므로 minScrollExtent(0)가 새 메시지 쪽(맨 아래)
+  /// reverse: true so minScrollExtent(0) is the new message side (bottom)
   void _scrollToBottom() {
     if (_scrollController.hasClients) {
       Future.delayed(const Duration(milliseconds: 300), () {
@@ -61,6 +62,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final currentSession = ref.watch(currentSessionProvider);
     final chatState = ref.watch(chatProvider);
     final isAITyping = ref.watch(isAITypingProvider);
@@ -68,8 +70,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     if (currentSession == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('채팅')),
-        body: const Center(child: Text('세션이 없습니다')),
+        appBar: AppBar(title: Text(l10n.chatTitle)),
+        body: Center(child: Text(l10n.chatNoSession)),
       );
     }
 
@@ -83,115 +85,109 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     return Stack(
       children: [
         Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          tooltip: '나가기',
-          onPressed: () => _showExitDialog(context),
-        ),
-        title: scenarioAsync.when(
-          data: (scenario) => Text(scenario?.title ?? '채팅'),
-          loading: () => const Text('로딩 중...'),
-          error: (_, __) => const Text('채팅'),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.check_circle_outline),
-            tooltip: '상담 종료하기',
-            onPressed: () => _showEndDialog(context, currentSession),
+          appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              tooltip: l10n.chatExitTooltip,
+              onPressed: () => _showExitDialog(context, l10n),
+            ),
+            title: scenarioAsync.when(
+              data: (scenario) => Text(scenario?.title ?? l10n.chatTitle),
+              loading: () => Text(l10n.loading),
+              error: (_, __) => Text(l10n.chatTitle),
+            ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.check_circle_outline),
+                tooltip: l10n.chatEndTooltip,
+                onPressed: () => _showEndDialog(context, currentSession, l10n),
+              ),
+            ],
           ),
-        ],
-      ),
-      body: Stack(
-        children: [
-          // 뒤: 채팅 목록만 터치 시 unfocus (입력 영역과 겹치지 않도록 영역 분리)
-          Positioned.fill(
-            child: Column(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onTap: () => FocusScope.of(context).unfocus(),
-                    child: currentSession.messages.isEmpty && !isAITyping
-                        ? _buildEmptyState(context)
-                        : ListView.builder(
-                            controller: _scrollController,
-                            reverse: true,
-                            // reverse이므로 bottom 패딩이 새 메시지 쪽(화면 하단) 여백
-                            // iOS safe area(홈 인디케이터) 높이를 더해 입력창에 가리지 않도록
-                            padding: EdgeInsets.only(
-                              top: 16,
-                              bottom: 88 + MediaQuery.of(context).padding.bottom,
-                            ),
-                            itemCount: currentSession.messages.length + (isAITyping ? 1 : 0),
-                            itemBuilder: (context, index) {
-                              // Typing indicator is at index 0 when reverse=true
-                              if (isAITyping && index == 0) {
-                                return const TypingIndicator();
-                              }
+          body: Stack(
+            children: [
+              Positioned.fill(
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        onTap: () => FocusScope.of(context).unfocus(),
+                        child: currentSession.messages.isEmpty && !isAITyping
+                            ? _buildEmptyState(context, l10n)
+                            : ListView.builder(
+                                controller: _scrollController,
+                                reverse: true,
+                                padding: EdgeInsets.only(
+                                  top: 16,
+                                  bottom: 88 + MediaQuery.of(context).padding.bottom,
+                                ),
+                                itemCount: currentSession.messages.length + (isAITyping ? 1 : 0),
+                                itemBuilder: (context, index) {
+                                  if (isAITyping && index == 0) {
+                                    return const TypingIndicator();
+                                  }
 
-                              final messageIndex = isAITyping ? index - 1 : index;
-                              final message =
-                                  currentSession.messages[currentSession
-                                          .messages
-                                          .length -
-                                      1 -
-                                      messageIndex];
-                              return ChatBubble(message: message);
-                            },
-                          ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // 앞: 입력 영역을 맨 위에 올려 전송 버튼 탭이 GestureDetector에 잡히지 않도록
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (chatState.hasError)
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    color: AppColors.error.withOpacity(0.1),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.error,
-                          color: AppColors.error,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            '오류: ${chatState.error}',
-                            style: const TextStyle(color: AppColors.error),
-                          ),
-                        ),
-                      ],
+                                  final messageIndex = isAITyping ? index - 1 : index;
+                                  final message =
+                                      currentSession.messages[currentSession
+                                              .messages
+                                              .length -
+                                          1 -
+                                          messageIndex];
+                                  return ChatBubble(message: message);
+                                },
+                              ),
+                      ),
                     ),
-                  ),
-                _buildInputArea(context),
-              ],
-            ),
+                  ],
+                ),
+              ),
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (chatState.hasError)
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        color: AppColors.error.withOpacity(0.1),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.error,
+                              color: AppColors.error,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                l10n.chatErrorPrefix(chatState.error.toString()),
+                                style: const TextStyle(color: AppColors.error),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    _buildInputArea(context, l10n),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
         ),
-        // Full-page loading overlay when generating feedback
         if (isFeedbackGenerating)
-          const FullPageLoadingOverlay(
-            message: 'AI가 상담 내용을 분석하고 있습니다...',
-            subtitle: '피드백을 생성하는 중입니다',
+          FullPageLoadingOverlay(
+            message: l10n.loadingOverlayMessage,
+            subtitle: l10n.loadingOverlaySubtitle,
           ),
       ],
     );
   }
 
-  Widget _buildEmptyState(BuildContext context) {
+  Widget _buildEmptyState(BuildContext context, AppLocalizations l10n) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -203,7 +199,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            '첫 메시지를 보내보세요',
+            l10n.chatEmptyStateTitle,
             style: Theme.of(
               context,
             ).textTheme.bodyLarge?.copyWith(color: AppColors.secondaryText),
@@ -212,7 +208,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32),
             child: Text(
-              '학생과의 대화를 시작하세요.\n공감하며 이야기를 들어주는 것이 중요합니다.',
+              l10n.chatEmptyStateSubtitle,
               textAlign: TextAlign.center,
               style: Theme.of(
                 context,
@@ -224,7 +220,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
   }
 
-  Widget _buildInputArea(BuildContext context) {
+  Widget _buildInputArea(BuildContext context, AppLocalizations l10n) {
     final chatState = ref.watch(chatProvider);
     final isLoading = chatState.isLoading;
 
@@ -250,7 +246,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 autofocus: false,
                 readOnly: false,
                 decoration: InputDecoration(
-                  hintText: '메시지를 입력하세요...',
+                  hintText: l10n.chatInputHint,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(24),
                   ),
@@ -270,7 +266,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               ),
             ),
             const SizedBox(width: 8),
-            // 포커스를 받지 않아 전송 시에도 TextField 포커스 유지 → 키보드 유지
             Material(
               color: Colors.transparent,
               child: InkWell(
@@ -304,23 +299,22 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     _scrollToBottom();
 
-    // 포커스 유지/복구: 즉시 1회 + 키보드 프레임 이후 1회 (기기별 안정성)
     _messageFocusNode.requestFocus();
     Future.delayed(const Duration(milliseconds: 50), () {
       if (mounted) _messageFocusNode.requestFocus();
     });
   }
 
-  void _showExitDialog(BuildContext context) {
+  void _showExitDialog(BuildContext context, AppLocalizations l10n) {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('상담 나가기'),
-        content: const Text('상담에서 나가시겠습니까?\n나중에 상담 탭에서 이어할 수 있습니다.'),
+        title: Text(l10n.chatExitDialogTitle),
+        content: Text(l10n.chatExitDialogContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('계속하기'),
+            child: Text(l10n.continueLabel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -328,17 +322,21 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               ref.read(currentSessionProvider.notifier).clearSession();
               context.go('/counseling');
             },
-            child: const Text('나가기'),
+            child: Text(l10n.exitLabel),
           ),
         ],
       ),
     );
   }
 
-  /// 상담 종료 시 최소 필요한 대화 횟수 (1회 = 사용자 메시지 1개 + AI 응답 1개)
+  /// Minimum number of exchanges required before ending the session
   static const int _minimumExchangeCount = 5;
 
-  void _showEndDialog(BuildContext context, TrainingSession currentSession) {
+  void _showEndDialog(
+    BuildContext context,
+    TrainingSession currentSession,
+    AppLocalizations l10n,
+  ) {
     final userMessageCount = currentSession.messages
         .where((m) => m.isUser)
         .length;
@@ -347,15 +345,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       showDialog(
         context: context,
         builder: (dialogContext) => AlertDialog(
-          title: const Text('상담 종료 불가'),
+          title: Text(l10n.chatEndBlockedTitle),
           content: Text(
-            '학생과 $_minimumExchangeCount번 이상 대화를 나눈 후 '
-            '상담을 종료할 수 있습니다. (현재 $userMessageCount/$_minimumExchangeCount회)',
+            l10n.chatMinExchangeContent(
+              _minimumExchangeCount,
+              userMessageCount,
+            ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('확인'),
+              child: Text(l10n.confirm),
             ),
           ],
         ),
@@ -366,12 +366,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('대화 종료'),
-        content: const Text('대화를 종료하시겠습니까?\n피드백을 받으실 수 있습니다.'),
+        title: Text(l10n.chatEndDialogTitle),
+        content: Text(l10n.chatEndDialogContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('계속하기'),
+            child: Text(l10n.continueLabel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -391,7 +391,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 }
               }
             },
-            child: const Text('종료하기'),
+            child: Text(l10n.chatEndConfirm),
           ),
         ],
       ),

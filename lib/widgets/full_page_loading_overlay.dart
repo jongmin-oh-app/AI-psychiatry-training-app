@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:psychiatry_training/l10n/app_localizations.dart';
 import '../core/constants/colors.dart';
 
 class FullPageLoadingOverlay extends StatelessWidget {
@@ -13,6 +14,8 @@ class FullPageLoadingOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       color: Colors.black.withOpacity(0.7),
       child: Center(
@@ -39,7 +42,7 @@ class FullPageLoadingOverlay extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  message ?? 'AI가 상담 내용을 분석하고 있습니다...',
+                  message ?? l10n.loadingOverlayMessage,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -57,7 +60,7 @@ class FullPageLoadingOverlay extends StatelessWidget {
                 ],
                 const SizedBox(height: 16),
                 Text(
-                  '잠시만 기다려주세요',
+                  l10n.pleaseWait,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: AppColors.hintText,
                       ),

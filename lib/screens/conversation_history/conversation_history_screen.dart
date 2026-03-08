@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:psychiatry_training/l10n/app_localizations.dart';
 import '../../models/chat_message.dart';
 import '../../widgets/chat_bubble.dart';
 
@@ -12,9 +13,11 @@ class ConversationHistoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('대화 내역'),
+        title: Text(l10n.conversationHistoryTitle),
       ),
       body: ListView.builder(
         padding: EdgeInsets.fromLTRB(
