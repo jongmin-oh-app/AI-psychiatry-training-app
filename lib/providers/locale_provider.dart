@@ -8,7 +8,7 @@ final sharedPreferencesProvider = Provider<SharedPreferences>(
 
 final localeProvider = StateNotifierProvider<LocaleNotifier, Locale>((ref) {
   final prefs = ref.read(sharedPreferencesProvider);
-  final code = prefs.getString('app_locale') ?? 'ko';
+  final code = prefs.getString('app_locale') ?? 'en';
   return LocaleNotifier(prefs, Locale(code));
 });
 
